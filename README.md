@@ -5,4 +5,4 @@ A repository for all my small projects to help me practice coding in different l
 
 #### Python
 1. Minesweeper
-    a. Minesweeper with Tkinter
+    >a. Minesweeper with Tkinter
