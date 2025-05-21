@@ -9,6 +9,7 @@ Proogram is meant for coding practice.
 
 import time
 import tkinter as tk
+import random
 
 # Tkinter Test
 '''
@@ -28,6 +29,44 @@ button.pack()
 window.mainloop()
 '''
 
+'''
+Class that stores grid properties
+Properties Stored:
+    size x, size y, bomb count, grid, revealed, flags, game state, and cells remaining.
+'''
+class Grid:
+    def __init__(self, size_x, size_y, bomb_count):
+        self.size_x = size_x
+        self.size_y = size_y
+        self.bomb_count = bomb_count
+
+        self.grid = []
+        self.revealed = []
+        self.flags = []
+        self.game_end = False
+        self.cells_remaining = 0
+
+        self.generate_grid()
+
+        # Generates a grid based on given parameters and stores all data an the Grid class
+    def generate_grid(self):
+        self.grid = [[0 for _ in range(self.size_x)] for _ in range(self.size_y)]
+        positions = [(x, y) for y in range(self.size_y) for x in range(self.size_x)]    # Generates an array of all possible positions in a given grid size
+        bomb_positions = random.sample(positions, self.bomb_count)      # Generates bomb positions based on the positions values
+    
+        # Test
+        print(bomb_positions)
+
+        # Appends '*' to any postition where a bomb is placed
+        for (x, y) in bomb_positions:
+            self.grid[y][x] = '*'
+
+        # Test
+        for row in self.grid:
+            print(" ".join(str(cell)for cell in row))
+
+
+# Formats time for time_track
 def time_format(sec):
     mins = sec // 60
     sec = sec % 60
@@ -36,6 +75,7 @@ def time_format(sec):
 
     print("Time Lapsed = {0}:{1}:{2}".format(int(hours),int(mins),int(sec)))
 
+# Tracks time and displays it based on the gem_end condition
 def time_track():
 
     # Test condition, value will change to true if game ends stopping the timer
@@ -54,6 +94,7 @@ def time_track():
             time_format(curr_sec)
 
 def main():
+    grid = Grid(size_x=9, size_y=9, bomb_count=10)
     time_track()
 
 main()
