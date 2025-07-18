@@ -35,6 +35,17 @@ Properties Stored:
     size x, size y, bomb count, grid, revealed, flags, game state, and cells remaining.
 '''
 class Grid:
+    clockwise_offsets = [
+        (0, 1),
+        (1, 1),
+        (1, 0),
+        (1, -1),
+        (0, -1),
+        (-1, -1),
+        (-1, 0),
+        (-1, 1)
+    ]
+
     def __init__(self, size_x, size_y, bomb_count):
         self.size_x = size_x
         self.size_y = size_y
@@ -60,6 +71,22 @@ class Grid:
         # Appends '*' to any postition where a bomb is placed
         for (x, y) in bomb_positions:
             self.grid[y][x] = '*'
+        
+        # Test clockwise offset values
+        for (x, y) in self.clockwise_offsets:
+            print(x, y)
+
+        # Adding numbers to the surrounding positions from the bomb
+        for (x, y) in bomb_positions:
+            print(x, y)
+            surrounding_positions = []
+            for (a, b) in self.clockwise_offsets:
+                x += a
+                y += b
+                pos = (x, y)
+                surrounding_positions.append(pos)
+            print(surrounding_positions)    # Test if the positions are being calculated correctly
+            
 
         # Test
         for row in self.grid:
