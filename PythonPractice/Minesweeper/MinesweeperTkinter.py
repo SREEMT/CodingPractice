@@ -73,20 +73,16 @@ class Grid:
             self.grid[y][x] = '*'
         
         # Test clockwise offset values
-        for (x, y) in self.clockwise_offsets:
-            print(x, y)
+        #for (x, y) in self.clockwise_offsets:
+        #    print(x, y)
 
         # Adding numbers to the surrounding positions from the bomb
         for (x, y) in bomb_positions:
-            print(x, y)
-            surrounding_positions = []
             for (a, b) in self.clockwise_offsets:
-                x += a
-                y += b
-                pos = (x, y)
-                surrounding_positions.append(pos)
-            print(surrounding_positions)    # Test if the positions are being calculated correctly
-            
+                nx = x + a
+                ny = y + b
+                if nx > -1 and nx < self.size_x and ny > -1 and ny < self.size_y and self.grid[ny][nx] != '*':
+                    self.grid[ny][nx] += 1
 
         # Test
         for row in self.grid:
