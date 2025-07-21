@@ -7,6 +7,8 @@ Minesweeper program using Tkinter for the GUI.
 Proogram is meant for coding practice.
 '''
 
+import sys
+import threading
 import time
 import tkinter as tk
 import random
@@ -116,8 +118,41 @@ def time_track():
             prev_sec = curr_sec
             time_format(curr_sec)
 
+# Creates the UI for the Game
+def gridUi(generated_grid):
+    root = tk.Tk()
+    root.title("Grid Display Test")
+    data_array = generated_grid.grid
+
+    # Use a frame for the grid
+    grid_frame = tk.Frame(root)
+    grid_frame.pack()
+
+    for row_index, row_data in enumerate(data_array):
+        for col_index, cell_data in enumerate(row_data):
+            label = tk.Label(grid_frame, text=cell_data, relief=tk.RAISED, borderwidth=1, width=2, height=1)
+            label.grid(row=row_index, column=col_index)
+
+    # Seperate frame for button
+    def handle_button_press(event):
+        root.destroy()
+        exit()
+
+
+    button = tk.Button(text="Grid Display Test")
+    button.bind("<Button-1>", handle_button_press)
+    button.pack(pady=10)
+
+    root.mainloop()
+
 def main():
     grid = Grid(size_x=9, size_y=9, bomb_count=10)
-    time_track()
+    
+    # Thread to have timer run while grid ui is running.
+    timer_thread = threading.Thread(target=time_track, args=(), daemon=True)
+    timer_thread.start()
+
+    # Generates the grid UI
+    gridUi(grid)
 
 main()
