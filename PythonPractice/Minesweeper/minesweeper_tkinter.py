@@ -83,14 +83,25 @@ class GridUi:
         # Event function to display cell information once clicked
         def show_cell_button(event):
             button = event.widget
-            button.config(text=button.stored_text)
+            if button.stored_text == '*':
+                button.config(text=button.stored_text, bg = 'crimson')
+            else:
+                button.config(text=button.stored_text, bg = 'aquamarine2')
+
+        def flag_cell(event):
+            button = event.widget
+            button.config(bg = 'chartreuse')
 
         # Generates all necessary cells to display in a gui.
         for row_index, row_data in enumerate(data_array):
             for col_index, cell_data in enumerate(row_data):
-                cell = tk.Button(grid_frame, text="", relief=tk.RAISED, borderwidth=1, width=2, height=1)
+
+                cell = tk.Button(grid_frame, text="", relief=tk.RAISED, borderwidth=1, width=2, height=1, bg = 'azure1')
                 cell.stored_text = cell_data
+
+                # Bind actions to buttons
                 cell.bind("<Button-1>", show_cell_button)
+                cell.bind("<Button-3>", flag_cell)
                 cell.grid(row=row_index, column=col_index)
 
         # Seperate frame for button
