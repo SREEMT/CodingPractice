@@ -25,6 +25,6 @@ def main():
     timer_thread.start()
 
     # Generates the grid UI
-    minesweeper_tkinter.gridUi(playGrid)
+    minesweeper_tkinter.GridUi(playGrid)
 
 main()

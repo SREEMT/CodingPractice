@@ -35,6 +35,8 @@ import sys
 import threading
 import time
 import tkinter as tk
+import grid
+
 
 # Formats time for time_track
 def time_format(sec):
@@ -63,29 +65,42 @@ def time_track():
             prev_sec = curr_sec
             time_format(curr_sec)
 
-# Creates the UI for the Game
-def gridUi(generated_grid):
-    root = tk.Tk()
-    root.title("Grid Display Test")
-    data_array = generated_grid.grid
+class GridUi:
+    def __init__(self, generated_grid):
+        self.generated_grid = generated_grid
+        self.gridUi()
 
-    # Use a frame for the grid
-    grid_frame = tk.Frame(root)
-    grid_frame.pack()
+    # Creates the UI for the Game
+    def gridUi(self):
+        root = tk.Tk()
+        root.title("Grid Display Test")
+        data_array = self.generated_grid.grid
 
-    for row_index, row_data in enumerate(data_array):
-        for col_index, cell_data in enumerate(row_data):
-            label = tk.Label(grid_frame, text=cell_data, relief=tk.RAISED, borderwidth=1, width=2, height=1)
-            label.grid(row=row_index, column=col_index)
+        # Use a frame for the grid
+        grid_frame = tk.Frame(root)
+        grid_frame.pack()
 
-    # Seperate frame for button
-    def handle_button_press(event):
-        root.destroy()
-        exit()
+        # Event function to display cell information once clicked
+        def show_cell_button(event):
+            button = event.widget
+            button.config(text=button.stored_text)
 
+        # Generates all necessary cells to display in a gui.
+        for row_index, row_data in enumerate(data_array):
+            for col_index, cell_data in enumerate(row_data):
+                cell = tk.Button(grid_frame, text="", relief=tk.RAISED, borderwidth=1, width=2, height=1)
+                cell.stored_text = cell_data
+                cell.bind("<Button-1>", show_cell_button)
+                cell.grid(row=row_index, column=col_index)
 
-    button = tk.Button(text="Grid Display Test")
-    button.bind("<Button-1>", handle_button_press)
-    button.pack(pady=10)
+        # Seperate frame for button
+        def handle_button_press(event):
+            root.destroy()
+            exit()
 
-    root.mainloop()
+        # Button Test for exit game button, kills program
+        button = tk.Button(text="Grid Display Test")
+        button.bind("<Button-1>", handle_button_press)
+        button.pack(pady=10)
+
+        root.mainloop()
