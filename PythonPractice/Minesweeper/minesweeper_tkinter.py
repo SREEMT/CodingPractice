@@ -3,6 +3,10 @@ Author: SREEMT
 Date: 5-16-2025
 Version: 1.0
 
+# Optimization Resources:
+#   https://noobtomaster.com/python-gui-tkinter/optimizing-performance-and-responsiveness/
+#   https://medium.com/tomtalkspython/tkinter-best-practices-optimizing-performance-and-code-structure-c49d1919fbb4
+
 GUI module for Minesweeper
 Includes timer function as well
 '''
@@ -38,46 +42,48 @@ import tkinter as tk
 import grid
 
 
-# Formats time for time_track
-def time_format(sec):
-    mins = sec // 60
-    sec = sec % 60
-    hours = mins // 60
-    mins = mins % 60
-
-    print("Time Lapsed = {0}:{1}:{2}".format(int(hours),int(mins),int(sec)))
-
-# Tracks time and displays it based on the gem_end condition
-def time_track():
-
-    # Test condition, value will change to true if game ends stopping the timer
-    game_end = False
-
-    start_time = time.time()
-    prev_sec = -1
-
-    while not game_end:
-        end_time = time.time()
-        time_lapsed = end_time - start_time
-        curr_sec = int(time_lapsed)
-
-        if curr_sec != prev_sec:
-            prev_sec = curr_sec
-            time_format(curr_sec)
-
 class GridUi:
     def __init__(self, generated_grid):
         self.generated_grid = generated_grid
+        self.sec = 0
+        self.timer_running = True
+        self.root = tk.Tk()
         self.gridUi()
+
+    # Formats time for time_track
+    def time_format(self, sec):
+        mins = sec // 60
+        sec = sec % 60
+        hours = mins // 60
+        mins = mins % 60
+
+        return "{0}:{1}:{2}".format(int(hours),int(mins),int(sec))
+
+    # Updates timer on the GUI
+    def update_timer(self):
+        if self.timer_running:
+            self.timer_label.config(text = f"Time: {self.time_format(self.sec)}")
+            self.sec += 1
+            self.root.after(1000, self.update_timer)
+
 
     # Creates the UI for the Game
     def gridUi(self):
-        root = tk.Tk()
-        root.title("Grid Display Test")
+        # root = tk.Tk()
+        self.root.title("Grid Display Test")
+
+        info_frame = tk.Frame(self.root)
+        info_frame.pack(pady = 5)
+
+        # Timer display label
+        self.timer_label = tk.Label(info_frame, text = "Time: 00:00:00", font = ("Helvetica", 14))
+        self.timer_label.pack()
+
+        # Data for game grid
         data_array = self.generated_grid.grid
 
         # Use a frame for the grid
-        grid_frame = tk.Frame(root)
+        grid_frame = tk.Frame(self.root)
         grid_frame.pack()
 
         # Event function to display cell information once clicked
@@ -85,6 +91,7 @@ class GridUi:
             button = event.widget
             if button.stored_text == '*':
                 button.config(text=button.stored_text, bg = 'crimson')
+                # self.timer_running = False
             else:
                 button.config(text=button.stored_text, bg = 'aquamarine2')
 
@@ -106,12 +113,16 @@ class GridUi:
 
         # Seperate frame for button
         def handle_button_press(event):
-            root.destroy()
+            self.timer_running = False
+            self.root.destroy()
             exit()
 
         # Button Test for exit game button, kills program
-        button = tk.Button(text="Grid Display Test")
-        button.bind("<Button-1>", handle_button_press)
-        button.pack(pady=10)
+        exit_button = tk.Button(text="Grid Display Test")
+        exit_button.bind("<Button-1>", handle_button_press)
+        exit_button.pack(pady=10)
 
-        root.mainloop()
+        # Start timer
+        self.update_timer()
+
+        self.root.mainloop()
