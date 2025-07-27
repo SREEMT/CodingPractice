@@ -35,12 +35,17 @@ class Grid:
         self.game_end = False
         self.cells_remaining = 0
 
-        self.generate_grid()
+        # self.generate_grid = None
 
     # Generates a grid based on given parameters and stores all data an the Grid class
-    def generate_grid(self):
+    def generate_grid(self, exclude_x = None, exclude_y = None):
         self.grid = [[0 for _ in range(self.size_x)] for _ in range(self.size_y)]
         positions = [(x, y) for y in range(self.size_y) for x in range(self.size_x)]    # Generates an array of all possible positions in a given grid size
+
+        # Exlude first clicked cell
+        if exclude_x is not None and exclude_y is not None:
+            positions.remove((exclude_x, exclude_y))
+
         bomb_positions = random.sample(positions, self.bomb_count)      # Generates bomb positions based on the positions values
     
         # Test

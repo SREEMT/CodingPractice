@@ -39,12 +39,20 @@ import sys
 import threading
 import time
 import tkinter as tk
+from functools import partial
 import grid
 
 
 class GridUi:
-    def __init__(self, generated_grid):
-        self.generated_grid = generated_grid
+    def __init__(self, size_x, size_y, bomb_count):
+        self.size_x = size_x
+        self.size_y = size_y
+        self.bomb_count = bomb_count
+        self.generated_grid = None
+
+        self.first_click = True
+        self.buttons =[]
+
         self.sec = 0
         self.timer_running = True
         self.root = tk.Tk()
@@ -79,50 +87,62 @@ class GridUi:
         self.timer_label = tk.Label(info_frame, text = "Time: 00:00:00", font = ("Helvetica", 14))
         self.timer_label.pack()
 
-        # Data for game grid
-        data_array = self.generated_grid.grid
-
         # Use a frame for the grid
         grid_frame = tk.Frame(self.root)
         grid_frame.pack()
 
-        # Event function to display cell information once clicked
-        def show_cell_button(event):
-            button = event.widget
-            if button.stored_text == '*':
-                button.config(text=button.stored_text, bg = 'crimson')
-                # self.timer_running = False
-            else:
-                button.config(text=button.stored_text, bg = 'aquamarine2')
-
-        def flag_cell(event):
-            button = event.widget
-            button.config(bg = 'chartreuse')
-
-        # Generates all necessary cells to display in a gui.
-        for row_index, row_data in enumerate(data_array):
-            for col_index, cell_data in enumerate(row_data):
-
-                cell = tk.Button(grid_frame, text="", relief=tk.RAISED, borderwidth=1, width=2, height=1, bg = 'azure1')
-                cell.stored_text = cell_data
-
-                # Bind actions to buttons
-                cell.bind("<Button-1>", show_cell_button)
-                cell.bind("<Button-3>", flag_cell)
-                cell.grid(row=row_index, column=col_index)
-
-        # Seperate frame for button
-        def handle_button_press(event):
-            self.timer_running = False
-            self.root.destroy()
-            exit()
+        # Generates the grid UI
+        for row in range(self.size_y):
+            button_row = []
+            for col in range(self.size_x):
+                btn = tk.Button(grid_frame, text="", relief=tk.RAISED, width=2, height=1, bg='azure1')
+                btn.grid(row=row, column=col)
+                btn.bind("<Button-1>", partial(self.on_cell_click, row, col))
+                button_row.append(btn)
+            self.buttons.append(button_row)
 
         # Button Test for exit game button, kills program
         exit_button = tk.Button(text="Grid Display Test")
-        exit_button.bind("<Button-1>", handle_button_press)
+        exit_button.bind("<Button-1>", lambda e: self.quit_game())
         exit_button.pack(pady=10)
 
         # Start timer
         self.update_timer()
 
         self.root.mainloop()
+    
+    # Handles game events when cells are clicked
+    def on_cell_click(self, row, col, event):
+        if self.first_click:
+            self.generated_grid = grid.Grid(self.size_x, self.size_y, self.bomb_count)
+            self.generated_grid.generate_grid(exclude_x = col, exclude_y = row)
+            self.first_click = False
+        
+        value = self.generated_grid.grid[row][col]
+        button = self.buttons[row][col]
+
+        if value =="*":
+            button.config(text = "*", bg = 'crimson')
+            self.timer_running = False
+            self.reveal_all()
+        else:
+            button.config(text=str(value), bg = "aquamarine2")
+            button.config(state = 'disabled')
+
+    # Reveals all cell data based on game state
+    def reveal_all(self):
+        for row in range(self.size_y):
+            for col in range(self.size_x):
+                value = self.generated_grid.grid[row][col]
+                button = self.buttons[row][col]
+                button.config(text = str(value))
+                if value == "*":
+                    button.config(bg = 'crimson')
+                else:
+                    button.config(bg = 'lightgrey')
+                button.config(state = 'disabled')
+
+    # Quit game function
+    def quit_game(self):
+        self.timer_running = False
+        self.root.destroy()
