@@ -50,6 +50,7 @@ class GridUi:
         self.size_y = size_y
         self.bomb_count = bomb_count
         self.generated_grid = None
+        self.flags_left = self.bomb_count
 
         # Cell attributes
         self.first_click = True
@@ -84,16 +85,35 @@ class GridUi:
         # root = tk.Tk()
         self.root.title("Grid Display Test")
 
+        # Timer bar to manage the timer display
+        timer_frame = tk.Frame(self.root)
+        timer_frame.grid(row = 0, column = 0, columnspan = 2, sticky = "ew")
+
+        # Timer label
+        self.timer_label = tk.Label(timer_frame, text = "Time: 00:00:00", font = ("Helvetica", 14))
+        self.timer_label.pack(pady = 5)
+
         info_frame = tk.Frame(self.root)
-        info_frame.pack(pady = 5)
+        # info_frame.pack(padx = 10, pady = 10)
+        info_frame.grid(row = 1, column = 0, sticky = "w")
 
-        # Timer display label
-        self.timer_label = tk.Label(info_frame, text = "Time: 00:00:00", font = ("Helvetica", 14))
-        self.timer_label.pack()
+        # Grid placed on left
+        grid_frame = tk.Frame(info_frame)
+        grid_frame.grid(row = 0, column = 0)
 
-        # Use a frame for the grid
-        grid_frame = tk.Frame(self.root)
-        grid_frame.pack()
+        # Buttons on right
+        side_panel = tk.Frame(info_frame)
+        side_panel.grid(row = 0, column = 1, padx = 10, sticky = "n")
+
+        # Flag counter
+        self.flag_label = tk.Label(side_panel, text = f"🚩 Flags: {self.flags_left}", font = ("Helvetica", 12))
+        self.flag_label.grid(row = 0, column = 0, pady = 5, padx = 5, sticky = "w")
+
+
+        # Use a frame for the grid (OLD FRAME)
+        # grid_frame = tk.Frame(self.root)
+        # grid_frame.pack()
+
 
         # Generates the grid UI
         for row in range(self.size_y):
@@ -107,9 +127,10 @@ class GridUi:
             self.buttons.append(button_row)
 
         # Button Test for exit game button, kills program
-        exit_button = tk.Button(text="Grid Display Test")
+        exit_button = tk.Button(side_panel, text= "Quit Game")
         exit_button.bind("<Button-1>", lambda e: self.quit_game())
-        exit_button.pack(pady=10)
+        # exit_button.pack(pady=10)
+        exit_button.grid(row = 0, column = 1, padx = 5, sticky = "w")
 
         # Start timer
         self.update_timer()
@@ -147,12 +168,16 @@ class GridUi:
             return
         
         if not self.flags[row][col]:
-            button.config(text="🚩", bg = "khaki", activebackground = "khaki", fg="red")
-            self.flags[row][col] = True
-            
+            if self.flags_left > 0:
+                button.config(text="🚩", bg = "khaki", activebackground = "khaki", fg="red")
+                self.flags[row][col] = True
+                self.flags_left -= 1
+                self.flag_label.config(text = f"🚩 Flags: {self.flags_left}")
         else:
             button.config(text="", bg="azure1", activebackground="azure1", fg="black")
             self.flags[row][col] = False
+            self.flags_left += 1
+            self.flag_label.config(text=f"🚩 Flags: {self.flags_left}")
 
     # Reveals all cell data based on game state
     def reveal_all(self):
