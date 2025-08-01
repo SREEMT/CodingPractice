@@ -45,14 +45,18 @@ import grid
 
 class GridUi:
     def __init__(self, size_x, size_y, bomb_count):
+        # Game rules
         self.size_x = size_x
         self.size_y = size_y
         self.bomb_count = bomb_count
         self.generated_grid = None
 
+        # Cell attributes
         self.first_click = True
         self.buttons =[]
+        self.flags = [[False for _ in range(self.size_x)] for _ in range(self.size_y)]
 
+        # Timer attributes
         self.sec = 0
         self.timer_running = True
         self.root = tk.Tk()
@@ -98,6 +102,7 @@ class GridUi:
                 btn = tk.Button(grid_frame, text="", relief=tk.RAISED, width=2, height=1, bg='azure1')
                 btn.grid(row=row, column=col)
                 btn.bind("<Button-1>", partial(self.on_cell_click, row, col))
+                btn.bind("<Button-3>", partial(self.on_right_click, row, col))
                 button_row.append(btn)
             self.buttons.append(button_row)
 
@@ -113,6 +118,9 @@ class GridUi:
     
     # Handles game events when cells are clicked
     def on_cell_click(self, row, col, event):
+        if self.flags[row][col]:
+            return
+
         if self.first_click:
             self.generated_grid = grid.Grid(self.size_x, self.size_y, self.bomb_count)
             self.generated_grid.generate_grid(exclude_x = col, exclude_y = row)
@@ -125,9 +133,26 @@ class GridUi:
             button.config(text = "*", bg = 'crimson')
             self.timer_running = False
             self.reveal_all()
+        elif button["state"] == "disabled":
+            return
         else:
             button.config(text=str(value), bg = "aquamarine2")
             button.config(state = 'disabled')
+    
+    # Places flag on cell if right clicked
+    def on_right_click(self, row, col, event):
+        button = self.buttons[row][col]
+        
+        if button["state"] == "disabled":
+            return
+        
+        if not self.flags[row][col]:
+            button.config(text="🚩", bg = "khaki", activebackground = "khaki", fg="red")
+            self.flags[row][col] = True
+            
+        else:
+            button.config(text="", bg="azure1", activebackground="azure1", fg="black")
+            self.flags[row][col] = False
 
     # Reveals all cell data based on game state
     def reveal_all(self):
