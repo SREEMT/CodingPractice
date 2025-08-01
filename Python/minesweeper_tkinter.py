@@ -7,34 +7,14 @@ Version: 1.0
 #   https://noobtomaster.com/python-gui-tkinter/optimizing-performance-and-responsiveness/
 #   https://medium.com/tomtalkspython/tkinter-best-practices-optimizing-performance-and-code-structure-c49d1919fbb4
 
+Theme Used:
+#   https://github.com/rdbende/Azure-ttk-theme
+
 GUI module for Minesweeper
 Includes timer function as well
 '''
 
-# Tkinter Test
-'''
-window = tk.Tk()
-window.title("Hello World")
-
-
-def handle_button_press(event):
-    window.destroy()
-
-
-button = tk.Button(text="My simple app.")
-button.bind("<Button-1>", handle_button_press)
-button.pack()
-
-# Start the event loop.
-window.mainloop()
-'''
-
-'''
-Class that stores grid properties
-Properties Stored:
-    size x, size y, bomb count, grid, revealed, flags, game state, and cells remaining.
-'''
-
+import os
 import sys
 import threading
 import time
@@ -61,6 +41,13 @@ class GridUi:
         self.sec = 0
         self.timer_running = True
         self.root = tk.Tk()
+
+        # Using a theme
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        theme_path = os.path.join(script_dir, "azure.tcl") 
+        self.root.tk.call("source", theme_path) 
+        self.root.tk.call("set_theme", "dark")
+        
         self.gridUi()
 
     # Formats time for time_track
@@ -119,7 +106,7 @@ class GridUi:
         for row in range(self.size_y):
             button_row = []
             for col in range(self.size_x):
-                btn = tk.Button(grid_frame, text="", relief=tk.RAISED, width=2, height=1, bg='azure1')
+                btn = tk.Button(grid_frame, text="", relief=tk.RAISED, width=2, height=1, bg='gray55', fg='black')
                 btn.grid(row=row, column=col)
                 btn.bind("<Button-1>", partial(self.on_cell_click, row, col))
                 btn.bind("<Button-3>", partial(self.on_right_click, row, col))
@@ -157,8 +144,9 @@ class GridUi:
         elif button["state"] == "disabled":
             return
         else:
-            button.config(text=str(value), bg = "aquamarine2")
+            button.config(text=str(value), bg = "darkolivegreen", fg = 'black', disabledforeground = 'black')
             button.config(state = 'disabled')
+            self.game_check()
     
     # Places flag on cell if right clicked
     def on_right_click(self, row, col, event):
@@ -174,10 +162,23 @@ class GridUi:
                 self.flags_left -= 1
                 self.flag_label.config(text = f"🚩 Flags: {self.flags_left}")
         else:
-            button.config(text="", bg="azure1", activebackground="azure1", fg="black")
+            button.config(text="", bg="gray55", activebackground="gray55", fg="black")
             self.flags[row][col] = False
             self.flags_left += 1
             self.flag_label.config(text=f"🚩 Flags: {self.flags_left}")
+
+    def game_check(self):
+        for row in range(self.size_y):
+            for col in range(self.size_x):
+                value = self.generated_grid.grid[row][col]
+                button = self.buttons[row][col]
+
+                if value != "*" and button["state"] != "disabled":
+                    return
+        
+        self.timer_running = False
+        self.win_reveal()
+        # Add win message
 
     # Reveals all cell data based on game state
     def reveal_all(self):
@@ -187,10 +188,32 @@ class GridUi:
                 button = self.buttons[row][col]
                 button.config(text = str(value))
                 if value == "*":
-                    button.config(bg = 'crimson')
+                    button.config(bg = 'crimson', fg = 'white', disabledforeground = 'white')
                 else:
-                    button.config(bg = 'lightgrey')
+                    button.config(bg = 'gray55', fg = 'black', disabledforeground = 'black')
                 button.config(state = 'disabled')
+
+    def win_reveal(self):
+        for row in range(self.size_y):
+            for col in range(self.size_x):
+                value = self.generated_grid.grid[row][col]
+                button = self.buttons[row][col]
+                button.config(text = str(value))
+                if value == "*":
+                    button.config(bg = 'crimson', fg = 'white', disabledforeground = 'white')
+                else:
+                    button.config(bg = 'darkolivegreen', fg = 'black', disabledforeground = 'black')
+                button.config(state = 'disabled')
+
+        # Test win screen
+        win_popup = tk.Toplevel(self.root)
+        win_popup.title("You Win!")
+
+        msg = tk.Label(win_popup, text="🎉 You won the game!", font=("Helvetica", 14))
+        msg.pack(padx=20, pady=20)
+
+        ok_btn = tk.Button(win_popup, text="OK", command=win_popup.destroy)
+        ok_btn.pack(pady=10)
 
     # Quit game function
     def quit_game(self):
