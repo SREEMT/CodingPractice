@@ -1,8 +1,6 @@
-# CodingPractice
-A repository for all my small projects to help me practice coding in different languages
-
-### Current Projects
+# MinesweeperPlayground
+A repository for different variations of minesweeper built with different languages and technologies
 
 #### Python
 1. Minesweeper
-    >a. Minesweeper with Tkinter
+   - Built with tkinter
